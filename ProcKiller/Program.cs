@@ -12,7 +12,6 @@ namespace ProcKiller
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new frmMain());
-            API.disableHook();
         }
 
         public static bool isKilling(Process P)
@@ -32,7 +31,7 @@ namespace ProcKiller
 
         public static void kill(Process P,bool force)
         {
-            if (!isKilling(P))
+            if (!isKilling(P) && P.Id != Process.GetCurrentProcess().Id)
             {
                 if (force)
                 {
@@ -43,7 +42,6 @@ namespace ProcKiller
                     try
                     {
                         P.CloseMainWindow();
-                        P.Dispose();
                     }
                     catch
                     {

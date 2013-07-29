@@ -82,7 +82,6 @@ namespace ProcKiller
         private void exitSilent()
         {
             tKill.Stop();
-            P.Dispose();
             Close();
         }
 
@@ -96,7 +95,6 @@ namespace ProcKiller
             if (!P.HasExited)
             {
                 P.Kill();
-                P.Dispose();
                 Close();
             }
         }

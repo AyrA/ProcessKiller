@@ -62,11 +62,11 @@
             // 
             // btnAbort
             // 
-            this.btnAbort.Location = new System.Drawing.Point(286, 7);
+            this.btnAbort.Location = new System.Drawing.Point(268, 7);
             this.btnAbort.Name = "btnAbort";
-            this.btnAbort.Size = new System.Drawing.Size(75, 23);
+            this.btnAbort.Size = new System.Drawing.Size(93, 23);
             this.btnAbort.TabIndex = 1;
-            this.btnAbort.Text = "Abort";
+            this.btnAbort.Text = "Leave running";
             this.btnAbort.UseVisualStyleBackColor = true;
             this.btnAbort.Visible = false;
             this.btnAbort.Click += new System.EventHandler(this.btnAbort_Click);

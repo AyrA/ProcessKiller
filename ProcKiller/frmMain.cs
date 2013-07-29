@@ -10,6 +10,8 @@ namespace ProcKiller
     {
         private Process P;
         private int MyID;
+        private bool KillTwice;
+        private Hotkey HK;
 
         private const int WM_SYSCOMMAND = 0x0112;
         private const int SC_MINIMIZE = 0xF020;
@@ -19,6 +21,7 @@ namespace ProcKiller
         {
             switch (m.Msg)
             {
+                    //Minimize Form
                 case WM_SYSCOMMAND:
                     int command = m.WParam.ToInt32() & 0xfff0;
                     if (command == SC_MINIMIZE)
@@ -27,7 +30,38 @@ namespace ProcKiller
                         return;
                     }
                     break;
+                case Hotkey.WM_HOTKEY_MSG_ID:
+                    switch ((int)m.WParam)
+                    {
+                        case 0:
+                        case 1:
+                            //Close+Terminate
+                            Program.kill(P, m.WParam.ToInt32()==1);
+                            break;
+                        case 2:
+                            //Terminate
+                            if (KillTwice)
+                            {
+                                try
+                                {
+                                    P.Kill();
+                                }
+                                catch
+                                {
+                                    //Access rights?
+                                }
+                                KillTwice = false;
+                            }
+                            else
+                            {
+                                KillTwice = true;
+                            }
+                            break;
+                    }
+                    break;
             }
+            //important, or other events will no longer be called!
+            //You basically cannot even use "this.Handle" if this code is not here.
             base.WndProc(ref m);
         }
 
@@ -40,7 +74,12 @@ namespace ProcKiller
         public frmMain()
         {
             InitializeComponent();
-            API.enableHook();
+
+            HK = new Hotkey();
+            HK.enable(this.Handle, Hotkey.Modifiers.Alt, Keys.Back);
+            HK.enable(this.Handle, Hotkey.Modifiers.Alt | Hotkey.Modifiers.Ctrl, Keys.Back);
+            HK.enable(this.Handle, Hotkey.Modifiers.Alt | Hotkey.Modifiers.Ctrl | Hotkey.Modifiers.Shift, Keys.Back);
+
             P = Process.GetProcessById(0);
             MyID = Process.GetCurrentProcess().Id;
             tUpdate.Start();
@@ -48,22 +87,26 @@ namespace ProcKiller
 
         private void tUpdate_Tick(object sender, EventArgs e)
         {
-            Process temp = API.GetActiveProcess();
-            if (temp.Id != MyID)
+            lock (P)
             {
-                lblText.Text = API.GetActiveWindowTitle();
-                if (temp.Id != P.Id)
+                Process temp = API.GetActiveProcess();
+                if (temp.Id != MyID)
                 {
-                    P.Dispose();
-                    P = temp;
-                    lblPID.Text = API.getActivePID().ToString();
-                    try
+                    lblText.Text = API.GetActiveWindowTitle();
+                    if (temp.Id != P.Id)
                     {
-                        lblEXE.Text = P.MainModule.FileName;
-                    }
-                    catch
-                    {
-                        lblEXE.Text = "unknown (you probably do not have permissions)";
+                        KillTwice = false;
+                        P.Dispose();
+                        P = temp;
+                        lblPID.Text = API.getActivePID().ToString();
+                        try
+                        {
+                            lblEXE.Text = P.MainModule.FileName;
+                        }
+                        catch
+                        {
+                            lblEXE.Text = "unknown (you probably do not have permissions)";
+                        }
                     }
                 }
             }
@@ -81,6 +124,21 @@ namespace ProcKiller
         {
             Show();
             NFI.Visible = false;
+        }
+
+        private void btnCloseProc_Click(object sender, EventArgs e)
+        {
+            Program.kill(P, false);
+        }
+
+        private void btnTerminateProc_Click(object sender, EventArgs e)
+        {
+            Program.kill(P, true);
+        }
+
+        private void btnKillProc_Click(object sender, EventArgs e)
+        {
+            P.Kill();
         }
     }
 }

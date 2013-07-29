@@ -16,19 +16,6 @@ namespace ProcKiller
         [DllImport("user32.dll")]
         private static extern IntPtr GetWindowThreadProcessId(IntPtr hWnd, out uint ProcessId);
 
-        private static Keyboard K;
-
-        public static void enableHook()
-        {
-            K = new Keyboard();
-        }
-
-        public static void disableHook()
-        {
-            K = null;
-            GC.Collect();
-        }
-
         public static Process GetActiveProcess()
         {
             return Process.GetProcessById((int)getActivePID());

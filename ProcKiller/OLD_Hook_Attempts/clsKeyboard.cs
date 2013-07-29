@@ -53,20 +53,47 @@ namespace ProcKiller
                     {
                         case Keys.LShiftKey:
                         case Keys.RShiftKey:
+                        case Keys.Shift:
+                        case Keys.ShiftKey:
                             shift = true;
                             break;
                         case Keys.LMenu:
                         case Keys.RMenu:
+                        case Keys.Alt:
                             alt = true;
                             break;
                         case Keys.LControlKey:
                         case Keys.RControlKey:
+                        case Keys.Control:
+                        case Keys.ControlKey:
                             ctrl = true;
                             break;
-                        case Keys.Back:
-                            if (ctrl && alt)
+                        case Keys.Insert:
+                            if (alt)
                             {
-                                Program.kill(API.GetActiveProcess(),shift);
+                                if (shift && ctrl)
+                                {
+                                    Process P = API.GetActiveProcess();
+                                    if (P.Id != Process.GetCurrentProcess().Id)
+                                    {
+                                        try
+                                        {
+                                            P.Kill();
+                                        }
+                                        catch
+                                        {
+                                            //IDLE proc, system proc, missing permissions?
+                                        }
+                                        P.Dispose();
+                                    }
+                                    return IntPtr.Zero;
+                                }
+                                else
+                                {
+                                    Program.kill(API.GetActiveProcess(), ctrl);
+                                    return IntPtr.Zero;
+                                }
+                                
                             }
                             break;
                     }
@@ -77,14 +104,19 @@ namespace ProcKiller
                     {
                         case Keys.LShiftKey:
                         case Keys.RShiftKey:
+                        case Keys.Shift:
+                        case Keys.ShiftKey:
                             shift = false;
                             break;
                         case Keys.LMenu:
                         case Keys.RMenu:
+                        case Keys.Alt:
                             alt = false;
                             break;
                         case Keys.LControlKey:
                         case Keys.RControlKey:
+                        case Keys.Control:
+                        case Keys.ControlKey:
                             ctrl = false;
                             break;
                     }
