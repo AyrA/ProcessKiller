@@ -22,7 +22,8 @@ namespace ProcKiller
 
         public frmKill(Process Proc)
         {
-            P = Proc;
+            //prevents deleting of the referenced object
+            P = Process.GetProcessById(Proc.Id);
             InitializeComponent();
             try
             {
@@ -41,40 +42,49 @@ namespace ProcKiller
         {
             lock (P)
             {
-                if (P.HasExited)
+                //This might not seem to be nice, but it is required.
+                //The process can be terminated and race conditions can happen.
+                try
                 {
-                    exitSilent();
-                }
-                else if (P.WaitForInputIdle(0))
-                {
-                    btnAbort.Visible = btnKill.Visible = true;
-                    if (!focused)
-                    {
-                        this.BringToFront();
-                        this.Focus();
-                        focused = true;
-                    }
-                    label1.Text = "PROCESS WAITS FOR USER INPUT";
-                }
-                else
-                {
-                    btnAbort.Visible = btnKill.Visible = false;
-                    label1.Text = "Killing PID: " + P.Id.ToString();
-                }
-                if (++i > MAXWAIT)
-                {
-                    if (!P.HasExited)
-                    {
-                        if (!P.WaitForInputIdle(0))
-                        {
-                            tKill.Stop();
-                            KillExit();
-                        }
-                    }
-                    else
+                    if (P.HasExited)
                     {
                         exitSilent();
                     }
+                    else if (P.WaitForInputIdle(0))
+                    {
+                        btnAbort.Visible = btnKill.Visible = true;
+                        if (!focused)
+                        {
+                            this.BringToFront();
+                            this.Focus();
+                            focused = true;
+                        }
+                        label1.Text = "PROCESS WAITS FOR USER INPUT";
+                    }
+                    else
+                    {
+                        btnAbort.Visible = btnKill.Visible = false;
+                        label1.Text = "Killing PID: " + P.Id.ToString();
+                    }
+                    if (++i > MAXWAIT)
+                    {
+                        if (!P.HasExited)
+                        {
+                            if (!P.WaitForInputIdle(0))
+                            {
+                                tKill.Stop();
+                                KillExit();
+                            }
+                        }
+                        else
+                        {
+                            exitSilent();
+                        }
+                    }
+                }
+                catch
+                {
+                    exitSilent();
                 }
             }
         }
