@@ -4,9 +4,11 @@ Process Killer
 Kills the focused Process with a keystroke.
 
 Supported Keystrokes:
+```
 [ALT]+[BACKSPACE]                - Close
 [CTRL]+[ALT]+[BACKSPACE]         - Close, then kill
 [SHIFT]+[CTRL]+[ALT]+[BACKSPACE] - Kill instantly
+```
 
 Close
 -----
